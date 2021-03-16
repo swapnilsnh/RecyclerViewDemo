@@ -1,37 +1,68 @@
 package com.snh.recyclerviewdemo;
 
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.snh.recyclerviewdemo.databinding.ActivityMainBinding;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.view.View;
-
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.snh.recyclerviewdemo.databinding.ActivityMainBinding;
+import com.snh.recyclerviewdemo.util.Logger;
+
+import java.util.LinkedList;
+
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
+    private RecyclerView mRecyclerView;
+    private WordListAdapter mAdapter;
+    private final LinkedList<String> mWordList = new LinkedList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        init();
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
+    }
+
+    private void init() {
+        setSupportActionBar(binding.toolbar);
+
+        binding.fab.setOnClickListener(view -> {
+            int wordListSize = mWordList.size();
+            //Add a new word to the wordlist
+            mWordList.addLast(" + word" + wordListSize);
+            //notify the adapter, that the data has changed.
+            mRecyclerView.getAdapter().notifyDataSetChanged();
+            mRecyclerView.smoothScrollToPosition(wordListSize);
+            Logger.logger("MainActivity FAB onClick");
         });
+
+        initSampleList();
+
+        /**
+         * Initializing RECYCLER VIEW
+         */
+//        Get handle to recycler view
+        mRecyclerView = findViewById(R.id.rv);
+//        create adapter and supply data to be displayed
+        mAdapter = new WordListAdapter(this, mWordList);
+//        connect adapter with recycler view
+        mRecyclerView.setAdapter(mAdapter);
+//        give recycler view a default layout manager
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        Logger.logger("MainActivity Adapter and Recycler view initialized and assigned");
+    }
+
+    private void initSampleList() {
+        mWordList.clear();
+        for (int i = 1; i <= 20; i++) {
+            mWordList.addLast("Word " + i);
+            Logger.logger("MainActivity initialized sample list with 20 items");
+        }
     }
 
     @Override
@@ -43,16 +74,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_reset) {
+            initSampleList();
+            mAdapter.notifyDataSetChanged();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }
