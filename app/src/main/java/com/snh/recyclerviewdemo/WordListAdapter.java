@@ -16,10 +16,12 @@ import java.util.LinkedList;
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordViewHolder> {
     private final LinkedList<String> mWordList;
     private final LayoutInflater mInflater;
+    private final WordListAdapter.WordListItemClickListener itemClickListener;
 
-    public WordListAdapter(Context context, LinkedList<String> mWordList) {
+    public WordListAdapter(Context context, LinkedList<String> mWordList, WordListItemClickListener listener) {
         this.mWordList = mWordList;
         mInflater = LayoutInflater.from(context);
+        this.itemClickListener = listener;
         Logger.logger("WordListAdapter Class constructor initialized\n" +
                 "with context and Linkedlist:worlist");
     }
@@ -27,9 +29,9 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordVi
     @NonNull
     @Override
     public WordListAdapter.WordViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-       Logger.logger("WordListAdapter > onCreateViewHolder");
+        Logger.logger("WordListAdapter > onCreateViewHolder");
         View view = mInflater.inflate(R.layout.wordlist_item, parent, false);
-        return new WordViewHolder(view, this);
+        return new WordViewHolder(view, this, itemClickListener);
     }
 
     @Override
@@ -45,30 +47,27 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordVi
         return mWordList.size();
     }
 
+    interface WordListItemClickListener {
+        void onWordClick(int pos);
+    }
+
     class WordViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final TextView wordItemView;
         final WordListAdapter mAdapter;
+        private final WordListItemClickListener listener;
 
-        public WordViewHolder(@NonNull View itemView, WordListAdapter adapter) {
+        public WordViewHolder(@NonNull View itemView, WordListAdapter adapter, WordListItemClickListener listener) {
             super(itemView);
             wordItemView = itemView.findViewById(R.id.tvWord);
             this.mAdapter = adapter;
+            this.listener = listener;
             itemView.setOnClickListener(this);
             Logger.logger("WordListAdapter.WordViewHolder Constructor called");
         }
 
         @Override
         public void onClick(View v) {
-//          Get position of the item that was clicked
-            int mPosition = getLayoutPosition();
-//          Use that to access the affected item in mWordList
-            String element = mWordList.get(mPosition);
-//          Change the word in the mWordList
-            mWordList.set(mPosition, "Clicked! " + element);
-//          Notify the adapter, that the data has changed so it can
-//          update the RecyclerView to display the data.
-            mAdapter.notifyDataSetChanged();
-            Logger.logger("WordListAdapter.WordViewHolder > onClick Event");
+            listener.onWordClick(getAdapterPosition());
         }
     }
 }

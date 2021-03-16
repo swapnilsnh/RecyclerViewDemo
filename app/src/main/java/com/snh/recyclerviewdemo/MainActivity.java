@@ -13,7 +13,7 @@ import com.snh.recyclerviewdemo.util.Logger;
 
 import java.util.LinkedList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements WordListAdapter.WordListItemClickListener {
     ActivityMainBinding binding;
     private RecyclerView mRecyclerView;
     private WordListAdapter mAdapter;
@@ -43,13 +43,12 @@ public class MainActivity extends AppCompatActivity {
 
         initSampleList();
 
-        /**
-         * Initializing RECYCLER VIEW
-         */
+
+ //Initializing RECYCLER VIEW
 //        Get handle to recycler view
         mRecyclerView = findViewById(R.id.rv);
 //        create adapter and supply data to be displayed
-        mAdapter = new WordListAdapter(this, mWordList);
+        mAdapter = new WordListAdapter(this, mWordList, this);
 //        connect adapter with recycler view
         mRecyclerView.setAdapter(mAdapter);
 //        give recycler view a default layout manager
@@ -82,5 +81,17 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onWordClick(int position) {
+//          Use that to access the affected item in mWordList
+        String element = mWordList.get(position);
+//          Change the word in the mWordList
+        mWordList.set(position, "Clicked! " + element);
+//          Notify the adapter, that the data has changed so it can
+//          update the RecyclerView to display the data.
+        mAdapter.notifyDataSetChanged();
+        Logger.logger("WordListAdapter.WordViewHolder > onClick Event");
     }
 }
